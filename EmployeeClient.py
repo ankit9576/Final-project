@@ -15,7 +15,8 @@ def show_employee_menu():
     print("2. Provide Feedback")
     print("3. Select Preference")
     print("4. Receive Notifications")
-    print("5. Logout")
+    print("5. Set User Preferences")
+    print("6. Logout")
 
 def handle_employee_actions(user):
     while True:
@@ -49,9 +50,23 @@ def handle_employee_actions(user):
             else:
                 print(response['message'])
         elif choice == '5':
+            set_user_preferences(user)
+        elif choice == '6':
             break
         else:
             print("Invalid choice. Please try again.")
+
+def set_user_preferences(user):
+    preference_1 = input("1) Please select one - Vegetarian, Non Vegetarian, Eggetarian: ")
+    preference_2 = input("2) Please select your spice level - High, Medium, Low: ")
+    preference_3 = input("3) What do you prefer most? - North Indian, South Indian, Other: ")
+    preferences = {
+        'preference_1': preference_1,
+        'preference_2': preference_2,
+        'preference_3': preference_3
+    }
+    response = send_request('set_user_preferences', {'user_id': user['user_id'], 'preferences': preferences})
+    print(response['message'])
 
 def main():
     while True:

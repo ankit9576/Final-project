@@ -1,3 +1,4 @@
+
 import socket
 import threading
 import json
@@ -71,6 +72,8 @@ def process_request(request_data):
         return remove_menu_item(request_data['item_name'])
     elif action == 'request_detailed_feedback':
         return request_detailed_feedback(request_data['item_name'])
+    elif action == 'set_user_preferences':
+        return set_user_preferences(request_data['user_id'], request_data['preferences'])
     else:
         return {'status': 'error', 'message': 'Invalid action'}
 
@@ -102,6 +105,16 @@ def register(user_id, password, user_name, role):
                            (user_id, user_name, role, password))
             conn.commit()
             return {'status': 'success', 'message': 'Registration successful'}
+
+def set_user_preferences(user_id, preferences):
+    with closing(connect_to_db()) as conn:
+        with closing(conn.cursor()) as cursor:
+            cursor.execute(
+                "UPDATE Users SET preference_1 = %s, preference_2 = %s, preference_3 = %s WHERE user_id = %s", 
+                (preferences['preference_1'], preferences['preference_2'], preferences['preference_3'], user_id)
+            )
+            conn.commit()
+            return {'status': 'success', 'message': 'Preferences updated successfully'}
 
 def get_user_role(user_id):
     with closing(connect_to_db()) as conn:
