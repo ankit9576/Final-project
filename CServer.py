@@ -1,4 +1,3 @@
-
 import socket
 import threading
 import json
@@ -72,8 +71,8 @@ def process_request(request_data):
         return remove_menu_item(request_data['item_name'])
     elif action == 'request_detailed_feedback':
         return request_detailed_feedback(request_data['item_name'])
-    elif action == 'set_user_preferences':
-        return set_user_preferences(request_data['user_id'], request_data['preferences'])
+    elif action == 'update_profile':
+        return update_profile(request_data['user_id'], request_data['preferences'])
     else:
         return {'status': 'error', 'message': 'Invalid action'}
 
@@ -105,16 +104,6 @@ def register(user_id, password, user_name, role):
                            (user_id, user_name, role, password))
             conn.commit()
             return {'status': 'success', 'message': 'Registration successful'}
-
-def set_user_preferences(user_id, preferences):
-    with closing(connect_to_db()) as conn:
-        with closing(conn.cursor()) as cursor:
-            cursor.execute(
-                "UPDATE Users SET preference_1 = %s, preference_2 = %s, preference_3 = %s WHERE user_id = %s", 
-                (preferences['preference_1'], preferences['preference_2'], preferences['preference_3'], user_id)
-            )
-            conn.commit()
-            return {'status': 'success', 'message': 'Preferences updated successfully'}
 
 def get_user_role(user_id):
     with closing(connect_to_db()) as conn:
@@ -189,12 +178,9 @@ def delete_menu_item(item_name):
                 item = cursor.fetchone()
                 if item:
                     item_id = item[0]
-                    # Delete related entries in the FoodFeedback table
                     cursor.execute("DELETE FROM FoodFeedback WHERE item_id = %s", (item_id,))
-                    # Delete the menu item
                     cursor.execute("DELETE FROM MenuItems WHERE item_name = %s", (item_name,))
                     conn.commit()
-                    # Send notification to employees about the deletion
                     cursor.execute("SELECT user_id FROM Users WHERE role = 'Employee'")
                     employees = cursor.fetchall()
                     for employee in employees:
@@ -388,6 +374,20 @@ def request_detailed_feedback(item_name):
                 return {'status': 'success', 'message': 'Detailed feedback requested successfully'}
     except Exception as e:
         print(f"Exception in request_detailed_feedback: {e}")
+        return {'status': 'error', 'message': str(e)}
+
+def update_profile(user_id, preferences):
+    try:
+        with closing(connect_to_db()) as conn:
+            with closing(conn.cursor()) as cursor:
+                cursor.execute(
+                    "UPDATE Users SET preference_1 = %s, preference_2 = %s, preference_3 = %s WHERE user_id = %s", 
+                    (preferences['preference_1'], preferences['preference_2'], preferences['preference_3'], user_id)
+                )
+                conn.commit()
+                return {'status': 'success', 'message': 'Profile updated successfully'}
+    except Exception as e:
+        print(f"Exception in update_profile: {e}")
         return {'status': 'error', 'message': str(e)}
 
 def start_server():

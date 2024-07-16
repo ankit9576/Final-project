@@ -24,11 +24,12 @@ def display_chef_menu():
 
 def display_employee_menu():
     print("\nEmployee Menu:")
-    print("1. Show available food item")
+    print("1. Show available food items")
     print("2. Provide Feedback")
     print("3. Select Preference")
     print("4. Receive Notifications")
-    print("5. Logout")
+    print("5. Set Personal Preference")
+    print("6. Logout")
 
 def get_user_choice():
     try:
@@ -108,6 +109,8 @@ def main():
                     elif choice == 4:
                         employee.receive_notification()
                     elif choice == 5:
+                        employee.set_personal_preference()
+                    elif choice == 6:
                         break
                     else:
                         print("Invalid choice. Please try again.")
